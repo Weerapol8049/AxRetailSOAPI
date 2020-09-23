@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="45b8a19d-bb43-43d3-85ef-2bdfe8ef0134" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://AOSLIVE:8101/DynamicsAx/Services/QueryService" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="QueryService.xsd" MetadataType="Schema" ID="1c98560b-cd52-49ef-a25c-68e5bb0c037a" SourceId="1" SourceUrl="http://aoslive:8101/DynamicsAx/Services/QueryService?xsd=xsd9" />
+    <MetadataFile FileName="QueryService1.xsd" MetadataType="Schema" ID="6f36ac82-dbf1-4394-9c98-d385070ca1bb" SourceId="1" SourceUrl="http://aoslive:8101/DynamicsAx/Services/QueryService?xsd=xsd8" />
+    <MetadataFile FileName="QueryService2.xsd" MetadataType="Schema" ID="ad6cfd3f-460d-450b-8bd0-2ca8dfd70531" SourceId="1" SourceUrl="http://aoslive:8101/DynamicsAx/Services/QueryService?xsd=xsd7" />
+    <MetadataFile FileName="QueryService3.xsd" MetadataType="Schema" ID="f08a8079-0492-4bf9-8a99-d4da1e0d0a55" SourceId="1" SourceUrl="http://aoslive:8101/DynamicsAx/Services/QueryService?xsd=xsd6" />
+    <MetadataFile FileName="QueryService4.xsd" MetadataType="Schema" ID="182f754a-14d4-4a40-ad7d-bd531c74e34b" SourceId="1" SourceUrl="http://aoslive:8101/DynamicsAx/Services/QueryService?xsd=xsd5" />
+    <MetadataFile FileName="QueryService5.xsd" MetadataType="Schema" ID="db32732a-6476-446d-b43e-7697849c6221" SourceId="1" SourceUrl="http://aoslive:8101/DynamicsAx/Services/QueryService?xsd=xsd4" />
+    <MetadataFile FileName="QueryService.wsdl" MetadataType="Wsdl" ID="a1f15c6f-d1de-499e-ad69-2dac4965a032" SourceId="1" SourceUrl="http://aoslive:8101/DynamicsAx/Services/QueryService" />
+    <MetadataFile FileName="QueryService6.xsd" MetadataType="Schema" ID="bf94010e-4485-4a2e-9a57-517c19a5a712" SourceId="1" SourceUrl="http://aoslive:8101/DynamicsAx/Services/QueryService?xsd=xsd2" />
+    <MetadataFile FileName="QueryService7.xsd" MetadataType="Schema" ID="a24e5138-fd3e-4c92-9850-dea1e6bbfdf6" SourceId="1" SourceUrl="http://aoslive:8101/DynamicsAx/Services/QueryService?xsd=xsd1" />
+    <MetadataFile FileName="QueryService8.xsd" MetadataType="Schema" ID="e77769d1-9930-40b7-9f9e-3af4f7fcedac" SourceId="1" SourceUrl="http://aoslive:8101/DynamicsAx/Services/QueryService?xsd=xsd0" />
+    <MetadataFile FileName="QueryService9.xsd" MetadataType="Schema" ID="758badc6-0557-42ef-a0f6-d38b6ba559c9" SourceId="1" SourceUrl="http://aoslive:8101/DynamicsAx/Services/QueryService?xsd=xsd3" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>
