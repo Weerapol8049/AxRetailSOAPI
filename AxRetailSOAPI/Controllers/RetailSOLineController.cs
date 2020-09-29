@@ -4,6 +4,7 @@ using AxRetailSOAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -14,32 +15,54 @@ namespace AxRetailSOAPI.Controllers
 {
     public class RetailSOLineController : ApiController
     {
+        string ConnectionString = @"Data Source=AXSQL2; 
+                                Initial Catalog=AX63_STM_Live; 
+                                Persist Security Info=True; 
+                                User ID=stmm;
+                                Password=stmm@48624; 
+                                Pooling=false;
+                                Application Name=UpdateMRPTrack;";
         [HttpGet]
         [Route("api/retailsoline/loaddata/{recid}")]
         public IHttpActionResult LoadData(string recid)
         {
             try
             {
-                DataTable dtData = QueryData.Find(
-                     "STMSalesSODailyLine",
-                     "StmSalesSoDailyLine",
-                     "SalesOrderDaily",
-                     recid
-                     ).Tables["StmSalesSoDailyLine"];
-
-                var data = (from a in dtData.AsEnumerable()
-                            select new RetailSOLine {
-                                RecId = a.Field<Int64>("RecId").ToString(),
-                                Amount = a.Field<double>("SalesAmount"),
-                                Date = a.Field<DateTime>("SalesDate"),
-                                Model = a.Field<string>("Model"),
-                                Qty = a.Field<double>("SalesQty"),
-                                Series = a.Field<string>("Series"),
-                                Sink = a.Field<string>("Sink"),
-                                Top = a.Field<string>("StmStoreId")
-                            }).ToList();
-
-                return Json(data);
+                List<RetailSOLine> list = new List<RetailSOLine>();
+                string sql = string.Format(@"SELECT [RECID]
+                                                  ,[MODEL]
+                                                  ,[SALESAMOUNT]
+                                                  ,[SALESDATE]
+                                                  ,[SALESQTY]
+                                                  ,[SINK]
+                                                  ,[SERIES]
+                                                  ,[STMSTOREID]
+                                                  ,[SALESORDERDAILY]
+                                              FROM [dbo].[STMSALESSODAILYLINE]
+                                              WHERE SALESORDERDAILY = '{0}'", recid);
+                SqlConnection con = new SqlConnection(ConnectionString);
+                con.Open();
+                SqlCommand cmd = new SqlCommand(sql, con);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new RetailSOLine
+                        {
+                            RecId = reader["RECID"].ToString(),
+                            Amount = Convert.ToDouble(reader["SALESAMOUNT"]),
+                            Date = Convert.ToDateTime(reader["SALESDATE"]),
+                            Model = reader["MODEL"].ToString(),
+                            Qty = Convert.ToDouble(reader["SALESQTY"]),
+                            Series = reader["SERIES"].ToString(),
+                            Sink = reader["SINK"].ToString(),
+                            Top = reader["STMSTOREID"].ToString()
+                        });
+                    }
+                    //Connection.Close();
+                }
+               
+                return Json(list);
             }
             catch (Exception ex)
             {
@@ -51,33 +74,57 @@ namespace AxRetailSOAPI.Controllers
         [HttpGet]
         public IHttpActionResult GetSeries(string pool)
         {
-            DataTable dt = ExecuteStaticQuery.Get("STMProductSeries").Tables[0];
+            List<Series> list = new List<Series>();
+            string sql = string.Format(@"SELECT DISTINCT [SERIES]
+                                          FROM [dbo].[STMPRODUCTSERIES]
+                                          WHERE SALESPOOLID = '{0}'
+                                          ORDER BY SERIES", pool);
 
-            var data = (from a in dt.AsEnumerable()
-                        where a.Field<string>("SalesPoolId") == pool
-                        orderby a.Field<string>("Series")
-                        select new Series {
-                            ProdSeries = a.Field<string>("Series")
-                        }).AsEnumerable().GroupBy(g => g.ProdSeries).Select(x => x.First());
-
-            return Json(data);
+            SqlConnection con = new SqlConnection(ConnectionString);
+            con.Open();
+            SqlCommand cmd = new SqlCommand(sql, con);
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    list.Add(new Series
+                    {
+                        ProdSeries = reader["SERIES"].ToString()
+                    });
+                }
+               // Connection.Close();
+            }
+           
+            return Json(list);
         }
 
         [Route("api/retailsoline/model/{series}")]
         [HttpGet]
         public IHttpActionResult GetModel(string series)
         {
-            DataTable dt = ExecuteStaticQuery.Get("STMProductSeries").Tables[0];
 
-            var data = (from a in dt.AsEnumerable()
-                        where a.Field<string>("Series") == series
-                        orderby a.Field<string>("Model")
-                        select new Series
-                        {
-                            Model = a.Field<string>("Model")
-                        }).ToList();
+            List<Series> list = new List<Series>();
+            string sql = string.Format(@"SELECT DISTINCT [MODEL]
+                                          FROM [dbo].[STMPRODUCTSERIES]
+                                          WHERE SERIES = '{0}'
+                                          ORDER BY MODEL", series);
 
-            return Json(data);
+            SqlConnection con = new SqlConnection(ConnectionString);
+            con.Open();
+            SqlCommand cmd = new SqlCommand(sql, con);
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    list.Add(new Series
+                    {
+                        Model = reader["MODEL"].ToString()
+                    });
+                }
+                //Connection.Close();
+            }
+
+            return Json(list);
         }
 
         [Route("api/retailsoline/create")]

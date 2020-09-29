@@ -4,6 +4,7 @@ using AxRetailSOAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -15,112 +16,219 @@ namespace AxRetailSOAPI.Controllers
 {
     public class RetailSOController : ApiController
     {
+
+        //[HttpGet]
+        //[Route("api/retailso/loaddata/{name}/{type}")]
+        //public IHttpActionResult LoadData(string name, string type)
+        //{
+        //    string field = "";
+        //    string storeName = "";
+        //    List<RetailSO> soList = new List<RetailSO>();
+        //    List<Stored> storeList = new List<Stored>();
+        //    try
+        //    {
+        //        DataTable tableStore = ExecuteStaticQuery.Get("STMSalesStore").Tables["STMSalesStore"];
+
+        //        switch (Convert.ToInt32(type))
+        //        {
+        //            case 0:
+        //                field = "Admin"; 
+        //                break;
+        //            case 1:
+        //                field = "SALES";
+        //                break;
+        //            case 2:
+        //                field = "SALESMANAGER";
+        //                break;
+        //            case 3:
+        //                field = "AREAMANAGER";
+        //                break;
+        //            case 4:
+        //                field = "KEYACMANAGER";
+        //                break;
+        //        }
+
+
+
+        //        if (field == "Admin")
+        //        {
+        //            storeList = (from a in tableStore.AsEnumerable()
+        //                         orderby a.Field<string>("StmStoreId")
+        //                         select new Stored
+        //                         {
+        //                             StoreId = a.Field<string>("StmStoreId"),
+        //                             StoreName = a.Field<string>("StmStoreName")
+        //                         }).ToList();
+        //        }
+        //        else
+        //        {
+        //            storeList = (from a in tableStore.AsEnumerable()
+        //                         orderby a.Field<string>("StmStoreId")
+        //                         where a.Field<string>(field) == name
+        //                         select new Stored
+        //                         {
+        //                             StoreId = a.Field<string>("StmStoreId"),
+        //                             StoreName = a.Field<string>("StmStoreName")
+        //                         }).ToList();
+        //        }
+
+        //        string sql = string.Format(@"SELECT [STMSTOREID]
+        //                                           ,[STMSTORENAME]
+        //                                      FROM [dbo].[STMSALESSTORE]
+        //                                      WHERE '{0}' = '{1}'", field, name);
+
+
+        //        string storeId = "";
+        //        foreach (var item in storeList)
+        //        {
+        //            storeId += item.StoreId + ",";
+        //        }
+        //        if (storeId != "")
+        //            storeId = storeId.Remove(storeId.Length - 1, 1);
+
+        //        DataTable dtData = QueryData.Find(
+        //            "STMSalesDaily",
+        //            "StmSalesSoDaily",
+        //            "StmStoreId",
+        //            storeId
+        //            ).Tables["STMSalesDaily"];
+        //        int i = 1;
+        //        foreach (DataRow row in dtData.AsEnumerable().OrderByDescending(x => x.Field<DateTime>("SalesDate")))
+        //        {
+        //            DataSet dsimage = QueryData.Find(
+        //                      "STMSalesImage",
+        //                      "StmSalesImage",
+        //                      "RefRecId",
+        //                      row["RecId"].ToString()
+        //                      );
+
+        //            DataSet ds = QueryData.Find(
+        //                   "STMSalesSODailyLine",
+        //                   "StmSalesSoDailyLine",
+        //                   "SalesOrderDaily",
+        //                   row["RecId"].ToString()
+        //                   );
+
+        //            string[] sName = (from a in storeList.AsEnumerable() where a.StoreId == row["StmStoreId"].ToString() select a.StoreName).ToArray();
+
+        //            soList.Add(new RetailSO
+        //            {
+        //                No = i++,
+        //                RecId = row["RecId"].ToString(),
+        //                StoreId = row["StmStoreId"].ToString(),
+        //                StoreName = sName[0].ToString(),
+        //                Pool = row["SalesPoolId"].ToString(),
+        //                Qty = Convert.ToDouble(row["SalesQty"]),
+        //                Amount = Convert.ToDouble(row["SalesAmount"]),
+        //                Date = Convert.ToDateTime(row["SalesDate"]),
+        //                DueDate = Convert.ToDateTime(row["DueDate"]),
+        //                ConfirmDate = Convert.ToDateTime(row["ConfirmDate"]),
+        //                PurchId = row["PurchId"].ToString(),
+        //                SalesId = row["SalesId"].ToString(),
+        //                CustName = row["SalesName"].ToString(),
+        //                LineCount = ds.Tables["StmSalesSoDailyLine"].Rows.Count,
+        //                ImageCount = dsimage.Tables["STMSalesImage"].Rows.Count
+        //            });
+
+        //            string sNamer = sName[0].ToString();
+
+        //        }
+
+        //        return Json(soList);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(ex.Message);
+        //    }
+        //}
+        string ConnectionString = @"Data Source=AXSQL2; 
+                                Initial Catalog=AX63_STM_Live; 
+                                Persist Security Info=True; 
+                                User ID=stmm;
+                                Password=stmm@48624; 
+                                Pooling=false;
+                                Application Name=UpdateMRPTrack;";
         [HttpGet]
         [Route("api/retailso/loaddata/{name}/{type}")]
         public IHttpActionResult LoadData(string name, string type)
         {
-            string storeType = "";
-            string storeName = "";
+            string field = "";
+            string where = "";
             List<RetailSO> soList = new List<RetailSO>();
             List<Stored> storeList = new List<Stored>();
             try
             {
-                DataTable tableStore = ExecuteStaticQuery.Get("STMSalesStore").Tables["STMSalesStore"];
- 
                 switch (Convert.ToInt32(type))
                 {
                     case 0:
-                        storeType = "Admin";
+                        field = "Admin";
                         break;
-                    case 1: storeType = "Sales";
+                    case 1:
+                        field = "SALES";
                         break;
                     case 2:
-                        storeType = "SalesManager";
+                        field = "SALESMANAGER";
                         break;
                     case 3:
-                        storeType = "AreaManager";
+                        field = "AREAMANAGER";
                         break;
                     case 4:
-                        storeType = "KeyAcManager";
+                        field = "KEYACMANAGER";
                         break;
                 }
-                if (storeType == "Admin")
-                {
-                    storeList = (from a in tableStore.AsEnumerable()
-                                 orderby a.Field<string>("StmStoreId")
-                                 select new Stored
-                                 {
-                                     StoreId = a.Field<string>("StmStoreId"),
-                                     StoreName = a.Field<string>("StmStoreName")
-                                 }).ToList();
-                }
-                else
-                {
-                    storeList = (from a in tableStore.AsEnumerable()
-                                 orderby a.Field<string>("StmStoreId")
-                                 where a.Field<string>(storeType) == name
-                                 select new Stored
-                                 {
-                                     StoreId = a.Field<string>("StmStoreId"),
-                                     StoreName = a.Field<string>("StmStoreName")
-                                 }).ToList();
-                }
-               
 
-                string storeId = "";
-                foreach (var item in storeList)
-                {
-                    storeId += item.StoreId + ",";
-                }
-                if (storeId != "")
-                    storeId = storeId.Remove(storeId.Length - 1, 1);
+                if (field != "Admin")
+                     where = string.Format("WHERE {0} = '{1}'", field, name);
 
-                DataTable dtData = QueryData.Find(
-                    "STMSalesDaily",
-                    "StmSalesSoDaily",
-                    "StmStoreId",
-                    storeId
-                    ).Tables["STMSalesDaily"];
+                string sql = string.Format(@"SELECT[SALESAMOUNT]
+                                                  ,[SALESDATE]
+                                                  ,[SALESPOOLID]
+                                                  ,[SALESQTY]
+                                                  ,so.[STMSTOREID]
+                                                  ,store.STMSTORENAME
+                                                  ,so.[RECID]
+                                                  ,[CONFIRMDATE]
+                                                  ,[DUEDATE]
+                                                  ,[PURCHID]
+                                                  ,[SALESID]
+                                                  ,[SALESNAME]
+	                                              ,(SELECT COUNT(RECID) FROM dbo.STMSALESIMAGE WHERE REFRECID = so.RECID) IMAGECOUNT
+	                                              ,(SELECT COUNT(RECID) FROM dbo.STMSALESSODAILYLINE WHERE SALESORDERDAILY = so.RECID) LINECOUNT
+                                              FROM[dbo].[STMSALESSODAILY] so
+                                              LEFT JOIN[dbo].[STMSALESSTORE] store
+                                              ON store.STMSTOREID = so.STMSTOREID
+                                              {0}
+                                              ORDER BY so.SALESDATE DESC", where);
+
+                SqlConnection con = new SqlConnection(ConnectionString);
+                con.Open();
+                SqlCommand cmd = new SqlCommand(sql, con);
+
                 int i = 1;
-                foreach (DataRow row in dtData.AsEnumerable().OrderByDescending(x => x.Field<DateTime>("SalesDate")))
+                using (var reader = cmd.ExecuteReader())
                 {
-                    DataSet dsimage = QueryData.Find(
-                              "STMSalesImage",
-                              "StmSalesImage",
-                              "RefRecId",
-                              row["RecId"].ToString()
-                              );
-
-                    DataSet ds = QueryData.Find(
-                           "STMSalesSODailyLine",
-                           "StmSalesSoDailyLine",
-                           "SalesOrderDaily",
-                           row["RecId"].ToString()
-                           );
-
-                    string[] sName = (from a in storeList.AsEnumerable() where a.StoreId == row["StmStoreId"].ToString() select a.StoreName).ToArray();
-
-                    soList.Add(new RetailSO
+                    while (reader.Read())
                     {
-                        No = i++,
-                        RecId = row["RecId"].ToString(),
-                        StoreId = row["StmStoreId"].ToString(),
-                        StoreName = sName[0].ToString(),
-                        Pool = row["SalesPoolId"].ToString(),
-                        Qty = Convert.ToDouble(row["SalesQty"]),
-                        Amount = Convert.ToDouble(row["SalesAmount"]),
-                        Date = Convert.ToDateTime(row["SalesDate"]),
-                        DueDate = Convert.ToDateTime(row["DueDate"]),
-                        ConfirmDate = Convert.ToDateTime(row["ConfirmDate"]),
-                        PurchId = row["PurchId"].ToString(),
-                        SalesId = row["SalesId"].ToString(),
-                        CustName = row["SalesName"].ToString(),
-                        LineCount = ds.Tables["StmSalesSoDailyLine"].Rows.Count,
-                        ImageCount = dsimage.Tables["STMSalesImage"].Rows.Count
-                    });
-
-                    string sNamer = sName[0].ToString();
-                   
+                        soList.Add(new RetailSO
+                        {
+                            No = i++,
+                            RecId = reader["RECID"].ToString(),
+                            StoreId = reader["STMSTOREID"].ToString(),
+                            StoreName = reader["STMSTORENAME"].ToString(),
+                            Pool = reader["SALESPOOLID"].ToString(),
+                            Qty = Convert.ToDouble(reader["SALESQTY"]),
+                            Amount = Convert.ToDouble(reader["SALESAMOUNT"]),
+                            Date = Convert.ToDateTime(reader["SALESDATE"]),
+                            DueDate = Convert.ToDateTime(reader["DUEDATE"]),
+                            ConfirmDate = Convert.ToDateTime(reader["CONFIRMDATE"]),
+                            PurchId = reader["PURCHID"].ToString(),
+                            SalesId = reader["SALESID"].ToString(),
+                            CustName = reader["SALESNAME"].ToString(),
+                            LineCount = Convert.ToInt32(reader["LINECOUNT"]),
+                            ImageCount = Convert.ToInt32(reader["IMAGECOUNT"])
+                        });
+                    }
+                    //Connection.Close();
                 }
 
                 return Json(soList);
@@ -131,54 +239,85 @@ namespace AxRetailSOAPI.Controllers
             }
         }
 
+
         [Route("api/retailso/pool")]
         [HttpGet]
         public IHttpActionResult GetPool()
         {
-            DataTable dt = ExecuteStaticQuery.Get("STMSalesPool").Tables[0];
+            List<Pool> list = new List<Pool>();
 
-            var pool = (from a in dt.AsEnumerable()
-                        select new Pool {
-                            PoolId = a.Field<string>("SalesPoolId"),
-                            Name = a.Field<string>("Name")
-                        }).ToList();
+            string sql = string.Format(@"SELECT [SALESPOOLID],[NAME] FROM [dbo].[SALESPOOL]");
 
-            return Json(pool);
+            SqlConnection con = new SqlConnection(ConnectionString);
+            con.Open();
+            SqlCommand cmd = new SqlCommand(sql, con);
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    list.Add(new Pool
+                    {
+                        PoolId = reader["SALESPOOLID"].ToString(),
+                        Name = reader["NAME"].ToString()
+                    });
+                }
+                //Connection.Close();
+            }
+
+            return Json(list);
         }
 
         [Route("api/retailso/stored/{name}/{type}")]
         [HttpGet]
         public IHttpActionResult GetStored(string name, string type)
         {
-            string storeType = "";
-            DataTable tableStore = ExecuteStaticQuery.Get("STMSalesStore").Tables["STMSalesStore"];
-
+            string field = "", where = "";
+            List<Stored> storeList = new List<Stored>();
+ 
             switch (Convert.ToInt32(type))
             {
+                case 0:
+                    field = "Admin";
+                    break;
                 case 1:
-                    storeType = "Sales";
+                    field = "SALES";
                     break;
                 case 2:
-                    storeType = "SalesManager";
+                    field = "SALESMANAGER";
                     break;
                 case 3:
-                    storeType = "AreaManager";
+                    field = "AREAMANAGER";
                     break;
                 case 4:
-                    storeType = "KeyAcManager";
+                    field = "KEYACMANAGER";
                     break;
             }
 
-            var store = (from a in tableStore.AsEnumerable()
-                         orderby a.Field<string>("StmStoreId")
-                         where a.Field<string>(storeType) == name
-                         select new Stored
-                         {
-                             StoreId = a.Field<string>("StmStoreId"),
-                             StoreName = a.Field<string>("StmStoreName")
-                         }).ToList();
+            if (field != "Admin")
+                where = string.Format("WHERE {0} = '{1}'", field, name);
 
-            return Json(store);
+
+            string sql = string.Format(@"SELECT [STMSTOREID]
+                                              ,[STMSTORENAME]
+                                          FROM [dbo].[STMSALESSTORE]
+                                          {0}", where);
+            SqlConnection con = new SqlConnection(ConnectionString);
+            con.Open();
+            SqlCommand cmd = new SqlCommand(sql, con);
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    storeList.Add(new Stored
+                    {
+                        StoreId = reader["STMSTOREID"].ToString(),
+                        StoreName = reader["STMSTORENAME"].ToString()
+                    });
+                }
+                //Connection.Close();
+            }
+            
+            return Json(storeList);
         }
 
         [Route("api/retailso/create")]

@@ -129,6 +129,7 @@
     <Compile Include="Classes\ExecuteStaticQuery.cs" />
     <Compile Include="Classes\QueryData.cs" />
     <Compile Include="Classes\RetailSOLog.cs" />
+    <Compile Include="Classes\Connection.cs" />
     <Compile Include="Classes\UserAccount.cs" />
     <Compile Include="Connected Services\AxRetailSOImages\Reference.cs">
       <AutoGen>True</AutoGen>
